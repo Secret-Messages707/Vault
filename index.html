@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الخزنة | Hamoudi Vault</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root { --primary: #00f2ff; --bg: #0a0a0a; --snapchat: #FFFC00; }
+        body { 
+            background: var(--bg); color: #fff; font-family: sans-serif; 
+            display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; margin: 0;
+        }
+        .theme-romantic { --primary: #ff4bb4; background-image: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
+        .theme-friend { --primary: #00d2ff; background-image: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
+        .theme-family { --primary: #ff9f43; background-image: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
+        .theme-others { --primary: #d4af37; background-image: radial-gradient(circle, #2c240a 0%, #050505 100%); }
+
+        .card { 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
+            border: 2px solid var(--primary); border-radius: 25px; padding: 30px; 
+            width: 100%; max-width: 400px; box-shadow: 0 0 20px var(--primary); text-align: center;
+        }
+        .counter-box { background: var(--primary); color: #000; padding: 4px 12px; border-radius: 12px; font-weight: bold; }
+        select, textarea, input { 
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; 
+            border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; box-sizing: border-box; 
+        }
+        button.main-btn { 
+            background: var(--primary); color: #000; width: 100%; padding: 15px; 
+            border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem;
+        }
+        .snap-btn {
+            display: flex; align-items: center; justify-content: center;
+            background: var(--snapchat); color: #000; text-decoration: none;
+            margin-top: 25px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 14px;
+        }
+        #qrcode { 
+            background: white; padding: 15px; border-radius: 10px; margin-top: 20px; 
+            display: none; justify-content: center; border: 5px solid var(--primary);
+        }
+        label { font-size: 12px; display: block; margin-top: 10px; text-align: right; color: var(--primary); }
+    </style>
+</head>
+<body id="mainBody">
+
+    <div class="card">
+        <h2>تشفير الرسائل 🔒</h2>
+        <p>الرصيد المتبقي: <span class="counter-box" id="counter">2</span></p>
+        
+        <div id="formArea">
+            <select id="identity" onchange="changeTheme()">
+                <option value="default">-- اختر هوية الرسالة --</option>
+                <option value="romantic">الزوجة ❤️</option>
+                <option value="friend">صديق ⚡</option>
+                <option value="family">الأهل 🏠</option>
+                <option value="others">أخرى (فخم) ✨</option>
+            </select>
+            
+            <input type="text" id="senderName" placeholder="اسم المرسل">
+            <textarea id="msg" rows="4" placeholder="اكتب رسالتك السرية هنا..."></textarea>
+            
+            <label>وقت فتح الرسالة:</label>
+            <input type="datetime-local" id="unlockTime">
+            
+            <button class="main-btn" onclick="generateVault()">إنشاء الـ QR Code</button>
+        </div>
+
+        <div id="qrcode"></div>
+
+        <a href="رابط_سنابك_هنا" class="snap-btn">
+            <span>👻 للدعم الفني تواصل معي</span>
+        </a>
+    </div>
+
+<script>
+    let remaining = localStorage.getItem('user_credit_final') || 2;
+    document.getElementById('counter').innerText = remaining;
+
+    function changeTheme() {
+        const id = document.getElementById('identity').value;
+        document.getElementById('mainBody').className = id !== 'default' ? 'theme-' + id : '';
+    }
+
+    function generateVault() {
+        if(parseInt(remaining) <= 0) { alert("انتهى الرصيد"); return; }
+        
+        const sender = document.getElementById('senderName').value;
+        const msg = document.getElementById('msg').value;
+        const time = document.getElementById('unlockTime').value;
+        const id = document.getElementById('identity').value;
+
+        if(!msg || !time || id === 'default' || !sender) { 
+            alert("أكمل جميع البيانات"); return; 
+        }
+
+        // رابط صفحة العرض المرفوعة مسبقاً
+        const viewPageURL = "https://secret-messages707.github.io/Vault/view.html"; 
+
+        const encryptedMsg = btoa(unescape(encodeURIComponent(msg)));
+        const encryptedSender = btoa(unescape(encodeURIComponent(sender)));
+        const timestamp = new Date(time).getTime();
+        
+        const finalURL = `${viewPageURL}?d=${encryptedMsg}&t=${timestamp}&s=${id}&n=${encryptedSender}`;
+
+        const qrContainer = document.getElementById('qrcode');
+        qrContainer.innerHTML = "";
+        qrContainer.style.display = "flex";
+        
+        new QRCode(qrContainer, { text: finalURL, width: 200, height: 200 });
+
+        remaining--;
+        localStorage.setItem('user_credit_final', remaining);
+        document.getElementById('counter').innerText = remaining;
+    }
+</script>
+</body>
+</html>
