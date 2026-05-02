@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رسالة مشفرة من أجلك</title>
+    <style>
+        :root { --primary: #00f2ff; --bg: #0a0a0a; }
+        body { 
+            background: var(--bg); color: #fff; font-family: sans-serif;
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; transition: 0.8s;
+        }
+        .theme-romantic { --primary: #ff4bb4; background-image: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
+        .theme-friend { --primary: #00d2ff; background-image: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
+        .theme-family { --primary: #ff9f43; background-image: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
+        .theme-others { --primary: #d4af37; background-image: radial-gradient(circle, #2c240a 0%, #050505 100%); }
+
+        .container { text-align: center; padding: 30px; border: 2px solid var(--primary); border-radius: 20px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); width: 85%; max-width: 400px; box-shadow: 0 0 20px var(--primary); }
+        #timer { font-size: 2.5rem; font-weight: bold; margin: 20px 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .message-box { display: none; animation: fadeIn 1.5s forwards; font-size: 1.2rem; line-height: 1.6; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body id="viewBody">
+
+    <div class="container">
+        <div id="statusIcon" style="font-size: 50px;">🔒</div>
+        <h2 id="statusText">هذه الرسالة محمية بوقت</h2>
+        <div id="timer">-- : -- : --</div>
+        <div id="messageArea" class="message-box">
+            <hr style="border-color: var(--primary); margin: 20px 0;">
+            <p id="finalMessage"></p>
+        </div>
+    </div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const data = urlParams.get('d');
+    const time = urlParams.get('t');
+    const theme = urlParams.get('s');
+
+    if(theme) document.getElementById('viewBody').className = 'theme-' + theme;
+
+    const decodedMsg = decodeURIComponent(escape(atob(data)));
+
+    const timerFunc = setInterval(() => {
+        const now = new Date().getTime();
+        const diff = time - now;
+
+        if (diff > 0) {
+            const h = Math.floor(diff / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById("timer").innerHTML = `${h}h ${m}m ${s}s`;
+        } else {
+            clearInterval(timerFunc);
+            document.getElementById("timer").style.display = "none";
+            document.getElementById("statusIcon").innerHTML = "🔓";
+            document.getElementById("statusText").innerHTML = "تم فتح الرسالة بنجاح";
+            document.getElementById("finalMessage").innerText = decodedMsg;
+            document.getElementById("messageArea").style.display = "block";
+        }
+    }, 1000);
+</script>
+</body>
+</html>
