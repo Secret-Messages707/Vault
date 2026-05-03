@@ -3,108 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خزنة الرسائل السرية | Hamoudi Vault</title>
+    <title>عرض الرسالة السرية | Hamoudi Vault</title>
     <style>
         :root { --primary: #00f2ff; --bg: #0a0a0a; }
         body { 
-            background: var(--bg); color: #fff; font-family: sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; overflow: hidden;
+            background: var(--bg); color: #fff; font-family: sans-serif; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            min-height: 100vh; margin: 0; padding: 20px;
         }
 
-        /* تنسيق الثيمات المستلمة من لوحة التحكم */
-        .theme-romantic { --primary: #ff4bb4; background: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
-        .theme-friend { --primary: #00d2ff; background: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
-        .theme-family { --primary: #ff9f43; background: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
-        .theme-others { --primary: #d4af37; background: radial-gradient(circle, #2c240a 0%, #050505 100%); }
+        /* --- الهويات (Themes) المتطابقة --- */
+        .theme-romantic { --primary: #ff4bb4; background-image: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
+        .theme-friend { --primary: #00d2ff; background-image: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
+        .theme-family { --primary: #ff9f43; background-image: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
+        .theme-others { --primary: #d4af37; background-image: radial-gradient(circle, #2c240a 0%, #050505 100%); }
 
-        .vault-container {
-            text-align: center; padding: 40px; border-radius: 30px;
-            border: 2px solid var(--primary); box-shadow: 0 0 30px var(--primary);
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            max-width: 85%; width: 350px; position: relative;
+        .card { 
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
+            border: 2px solid var(--primary); border-radius: 25px; padding: 30px; 
+            width: 100%; max-width: 400px; box-shadow: 0 0 20px var(--primary); text-align: center;
         }
-        #timer { font-size: 2.2rem; font-weight: bold; margin: 20px 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
-        #messageArea { display: none; font-size: 1.2rem; line-height: 1.6; animation: fadeIn 1s ease-in; }
-        .sender-tag { font-size: 0.9rem; color: var(--primary); margin-bottom: 10px; opacity: 0.9; font-weight: bold; }
+        .msg-box { 
+            background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; 
+            margin: 20px 0; border: 1px solid var(--primary); min-height: 100px;
+            white-space: pre-wrap; word-wrap: break-word; line-height: 1.6;
+        }
+        .sender-tag { color: var(--primary); font-weight: bold; font-size: 1.2rem; }
+        .timer { font-size: 0.9rem; color: #aaa; margin-top: 10px; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        /* الزر الجديد (صغير ومخفي في البداية)[span_2](start_span)[span_2](end_span) */
+        #marketingBtn {
+            display: none; /* يظهر فقط بعد الفتح[span_3](start_span)[span_3](end_span) */
+            margin-top: 25px; padding: 8px 15px;
+            background: transparent; border: 1px solid var(--primary);
+            color: var(--primary); text-decoration: none; border-radius: 20px;
+            font-size: 12px; font-weight: normal; transition: 0.3s;
+            opacity: 0.8;
+        }
+        #marketingBtn:hover { background: var(--primary); color: #000; opacity: 1; }
     </style>
 </head>
-<body id="bodyTag">
+<body id="viewBody">
 
-    <div class="vault-container">
-        <div id="senderDisplay" class="sender-tag">جاري فحص محتويات الخزنة...</div>
-        
-        <div id="lockIcon" style="font-size: 60px; margin-bottom: 10px;">🔒</div>
-        
-        <div id="statusText" style="font-size: 14px;">ستفتح هذه الرسالة بعد:</div>
-        <div id="timer">00:00:00</div>
-
-        <div id="messageArea">
-            <div style="font-size: 50px; margin-bottom: 15px;">🔓</div>
-            <p id="mainMessage" style="word-wrap: break-word; white-space: pre-wrap;"></p>
-            <hr style="border: 0; border-top: 1px solid var(--primary); opacity: 0.3; margin: 20px 0;">
-            <p style="font-size: 0.85rem;">مرسلة بواسطة: <br><b id="finalSender" style="font-size: 1.1rem; color: var(--primary);"></b></p>
+    <div class="card" id="lockCard">
+        <h2 id="headerTitle">🔒 رسالة محمية</h2>
+        <div id="contentArea">
+            <p id="countdown" class="timer">جاري التحقق من وقت الفتح...</p>
         </div>
+        
+        <!-- الزر المحدث حسب طلبك[span_4](start_span)[span_4](end_span) -->
+        <a id="marketingBtn" href="https://secret-messages707.github.io/Vault/index_3.html">
+            تبغى ترسل رسالة مشفرة مثل كذا ؟ ✨
+        </a>
     </div>
 
 <script>
-    // دالة فك التشفير المتوافقة مع لوحة التحكم
-    function decodeArabic(str) {
-        try {
-            return decodeURIComponent(escape(atob(str)));
-        } catch (e) {
-            return "تعذر قراءة النص";
-        }
-    }
-
-    // جلب البيانات من الرابط
     const urlParams = new URLSearchParams(window.location.search);
-    const data = urlParams.get('d'); // الرسالة
-    const time = urlParams.get('t'); // الوقت
-    const style = urlParams.get('s'); // الثيم
-    const name = urlParams.get('n'); // اسم المرسل
+    const d = urlParams.get('d'); 
+    const t = urlParams.get('t'); 
+    const s = urlParams.get('s'); 
+    const n = urlParams.get('n'); 
 
-    // 1. تطبيق الثيم فوراً
-    if(style) document.getElementById('bodyTag').className = 'theme-' + style;
-    
-    // 2. معالجة اسم المرسل
-    if(name) {
-        const decodedName = decodeArabic(name);
-        document.getElementById('senderDisplay').innerText = "وصلتك رسالة خاصة من: " + decodedName;
-        document.getElementById('finalSender').innerText = decodedName;
+    if(s && s !== 'default') {
+        document.body.className = 'theme-' + s;
     }
 
-    // 3. نظام العد التنازلي والفتح التلقائي
-    if (time) {
-        const targetTime = parseInt(time);
-        const x = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = targetTime - now;
+    function update() {
+        const now = new Date().getTime();
+        const diff = t - now;
 
-            if (distance <= 0) {
-                clearInterval(x);
-                document.getElementById("lockIcon").style.display = "none";
-                document.getElementById("statusText").style.display = "none";
-                document.getElementById("timer").style.display = "none";
-                document.getElementById("senderDisplay").style.display = "none";
-                
-                // عرض الرسالة المفكوكة
-                if(data) {
-                    document.getElementById("mainMessage").innerText = decodeArabic(data);
-                }
-                document.getElementById("messageArea").style.display = "block";
-            } else {
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                document.getElementById("timer").innerHTML = hours + "h " + minutes + "m " + seconds + "s ";
-            }
-        }, 1000);
+        if (diff <= 0) {
+            const decodedMsg = decodeURIComponent(escape(atob(d)));
+            const decodedSender = decodeURIComponent(escape(atob(n)));
+            
+            document.getElementById('headerTitle').innerText = "تم فتح الرسالة ✅";
+            document.getElementById('contentArea').innerHTML = `
+                <p>مرسلة من: <span class="sender-tag">${decodedSender}</span></p>
+                <div class="msg-box">${decodedMsg}</div>
+            `;
+            
+            // إظهار الزر الصغير بعد فتح الرسالة[span_5](start_span)[span_5](end_span)
+            document.getElementById('marketingBtn').style.display = 'inline-block';
+            return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        document.getElementById('countdown').innerText = `ستفتح الرسالة بعد: ${hours}س ${mins}د ${secs}ث`;
+    }
+
+    if(d && t && n) {
+        setInterval(update, 1000);
+        update();
     } else {
-        document.getElementById("statusText").innerText = "خطأ: الرابط غير صالح";
-        document.getElementById("timer").style.display = "none";
+        document.getElementById('contentArea').innerHTML = "<p>رابط غير صالح!</p>";
     }
 </script>
 </body>
