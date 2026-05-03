@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>خزنة الرسائل السرية | Vault</title>
+    <title>خزنة الرسائل السرية | Hamoudi Vault</title>
     <style>
         :root { --primary: #00f2ff; --bg: #0a0a0a; }
         body { 
-            background: var(--bg); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg); color: #fff; font-family: sans-serif;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             height: 100vh; margin: 0; overflow: hidden;
         }
-        /* تنسيق الثيمات المربوطة بالداش بورد */
+
+        /* تنسيق الثيمات المستلمة من لوحة التحكم */
         .theme-romantic { --primary: #ff4bb4; background: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
         .theme-friend { --primary: #00d2ff; background: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
         .theme-family { --primary: #ff9f43; background: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
@@ -21,9 +22,9 @@
             text-align: center; padding: 40px; border-radius: 30px;
             border: 2px solid var(--primary); box-shadow: 0 0 30px var(--primary);
             background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-            max-width: 85%; width: 350px;
+            max-width: 85%; width: 350px; position: relative;
         }
-        #timer { font-size: 2.5rem; font-weight: bold; margin: 20px 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        #timer { font-size: 2.2rem; font-weight: bold; margin: 20px 0; color: var(--primary); text-shadow: 0 0 10px var(--primary); }
         #messageArea { display: none; font-size: 1.2rem; line-height: 1.6; animation: fadeIn 1s ease-in; }
         .sender-tag { font-size: 0.9rem; color: var(--primary); margin-bottom: 10px; opacity: 0.9; font-weight: bold; }
         
@@ -33,77 +34,78 @@
 <body id="bodyTag">
 
     <div class="vault-container">
-        <!-- مكان ظهور اسم المرسل قبل الفتح -->
         <div id="senderDisplay" class="sender-tag">جاري فحص محتويات الخزنة...</div>
         
         <div id="lockIcon" style="font-size: 60px; margin-bottom: 10px;">🔒</div>
         
-        <div id="statusText">ستفتح هذه الخزنة بعد:</div>
+        <div id="statusText" style="font-size: 14px;">ستفتح هذه الرسالة بعد:</div>
         <div id="timer">00:00:00</div>
 
-        <!-- منطقة الرسالة (تظهر بعد انتهاء الوقت) -->
         <div id="messageArea">
             <div style="font-size: 50px; margin-bottom: 15px;">🔓</div>
-            <p id="mainMessage" style="word-wrap: break-word;"></p>
+            <p id="mainMessage" style="word-wrap: break-word; white-space: pre-wrap;"></p>
             <hr style="border: 0; border-top: 1px solid var(--primary); opacity: 0.3; margin: 20px 0;">
-            <p style="font-size: 0.85rem;">هذه الرسالة مرسلة بواسطة: <br><b id="finalSender" style="font-size: 1.1rem;"></b></p>
+            <p style="font-size: 0.85rem;">مرسلة بواسطة: <br><b id="finalSender" style="font-size: 1.1rem; color: var(--primary);"></b></p>
         </div>
     </div>
 
 <script>
-    // وظيفة لفك تشفير النصوص العربية
+    // دالة فك التشفير المتوافقة مع لوحة التحكم
     function decodeArabic(str) {
         try {
             return decodeURIComponent(escape(atob(str)));
         } catch (e) {
-            return "خطأ في قراءة البيانات";
+            return "تعذر قراءة النص";
         }
     }
 
-    // قراءة البيانات من الرابط (URL)
+    // جلب البيانات من الرابط
     const urlParams = new URLSearchParams(window.location.search);
-    const data = urlParams.get('d'); // الرسالة المشفرة
-    const time = urlParams.get('t'); // وقت الفتح (Timestamp)
-    const style = urlParams.get('s'); // نوع الثيم
-    const name = urlParams.get('n'); // اسم المرسل المشفر
+    const data = urlParams.get('d'); // الرسالة
+    const time = urlParams.get('t'); // الوقت
+    const style = urlParams.get('s'); // الثيم
+    const name = urlParams.get('n'); // اسم المرسل
 
-    // 1. تطبيق الثيم المختار
+    // 1. تطبيق الثيم فوراً
     if(style) document.getElementById('bodyTag').className = 'theme-' + style;
     
-    // 2. إظهار اسم المرسل إذا وجد
+    // 2. معالجة اسم المرسل
     if(name) {
         const decodedName = decodeArabic(name);
         document.getElementById('senderDisplay').innerText = "وصلتك رسالة خاصة من: " + decodedName;
         document.getElementById('finalSender').innerText = decodedName;
     }
 
-    const targetTime = parseInt(time);
+    // 3. نظام العد التنازلي والفتح التلقائي
+    if (time) {
+        const targetTime = parseInt(time);
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = targetTime - now;
 
-    // 3. نظام العداد التنازلي
-    const x = setInterval(function() {
-        const now = new Date().getTime();
-        const distance = targetTime - now;
-
-        if (distance < 0) {
-            // عند انتهاء الوقت:
-            clearInterval(x);
-            document.getElementById("lockIcon").style.display = "none";
-            document.getElementById("statusText").style.display = "none";
-            document.getElementById("timer").style.display = "none";
-            document.getElementById("senderDisplay").style.display = "none";
-            
-            // فك تشفير الرسالة وعرضها
-            document.getElementById("mainMessage").innerText = decodeArabic(data);
-            document.getElementById("messageArea").style.display = "block";
-        } else {
-            // حساب الساعات والدقائق والثواني
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            
-            document.getElementById("timer").innerHTML = hours + "h " + minutes + "m " + seconds + "s ";
-        }
-    }, 1000);
+            if (distance <= 0) {
+                clearInterval(x);
+                document.getElementById("lockIcon").style.display = "none";
+                document.getElementById("statusText").style.display = "none";
+                document.getElementById("timer").style.display = "none";
+                document.getElementById("senderDisplay").style.display = "none";
+                
+                // عرض الرسالة المفكوكة
+                if(data) {
+                    document.getElementById("mainMessage").innerText = decodeArabic(data);
+                }
+                document.getElementById("messageArea").style.display = "block";
+            } else {
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                document.getElementById("timer").innerHTML = hours + "h " + minutes + "m " + seconds + "s ";
+            }
+        }, 1000);
+    } else {
+        document.getElementById("statusText").innerText = "خطأ: الرابط غير صالح";
+        document.getElementById("timer").style.display = "none";
+    }
 </script>
 </body>
 </html>
