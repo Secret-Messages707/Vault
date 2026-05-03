@@ -3,39 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الرسائل المشفرة | Encrypted Messages</title>
+    <title>عرض الرسالة المشفرة | Encrypted Messages</title>
     <style>
         :root { --primary: #00f2ff; --bg: #0a0a0a; }
-        body { 
-            background: var(--bg); color: #fff; font-family: sans-serif; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            min-height: 100vh; margin: 0; padding: 20px;
-        }
+        body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
         .theme-romantic { --primary: #ff4bb4; background-image: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
         .theme-friend { --primary: #00d2ff; background-image: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
         .theme-family { --primary: #ff9f43; background-image: radial-gradient(circle, #3d2610 0%, #0a0a0a 100%); }
         .theme-others { --primary: #d4af37; background-image: radial-gradient(circle, #2c240a 0%, #050505 100%); }
-        .card { 
-            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px);
-            border: 2px solid var(--primary); border-radius: 25px; padding: 30px; 
-            width: 100%; max-width: 400px; box-shadow: 0 0 20px var(--primary); text-align: center;
-        }
-        .msg-box { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid var(--primary); min-height: 100px; white-space: pre-wrap; line-height: 1.6; }
-        .sender-tag { color: var(--primary); font-weight: bold; }
+        .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 2px solid var(--primary); border-radius: 25px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 0 20px var(--primary); text-align: center; }
+        .msg-box { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 15px; margin: 20px 0; border: 1px solid var(--primary); min-height: 100px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; }
+        .sender-tag { color: var(--primary); font-weight: bold; font-size: 1.2rem; }
         .timer { font-size: 1.1rem; color: #fff; margin-top: 15px; font-weight: bold; }
         #marketingBtn { display: none; margin-top: 25px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary); color: var(--primary); text-decoration: none; border-radius: 20px; font-size: 12px; }
     </style>
 </head>
-<body>
+<body id="viewBody">
     <div class="card">
         <h2 id="headerTitle">🔒 رسالة محمية</h2>
-        <div id="contentArea"><p id="countdown" class="timer">جاري المزامنة...</p></div>
+        <div id="contentArea">
+            <p id="countdown" class="timer">جاري المزامنة...</p>
+        </div>
         <a id="marketingBtn" href="./index.html">تبغى ترسل رسالة مشفرة مثل كذا ؟ ✨</a>
     </div>
+
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const d = urlParams.get('d'), t = parseInt(urlParams.get('t')), s = urlParams.get('s'), n = urlParams.get('n');
     if(s && s !== 'default') { document.body.className = 'theme-' + s; }
+
     function update() {
         const diff = t - Date.now();
         if (diff <= 0) {
@@ -44,13 +40,15 @@
                 document.getElementById('headerTitle').innerText = "تم فتح الرسالة ✅";
                 document.getElementById('contentArea').innerHTML = `<p>مرسلة من: <span class="sender-tag">${sender}</span></p><div class="msg-box">${msg}</div>`;
                 document.getElementById('marketingBtn').style.display = 'inline-block';
-            } catch(e) { document.getElementById('contentArea').innerHTML = "<p>خطأ!</p>"; }
+            } catch(e) { document.getElementById('contentArea').innerHTML = "<p>خطأ في فك التشفير!</p>"; }
             return;
         }
         const hours = Math.floor(diff/3600000), mins = Math.floor((diff%3600000)/60000), secs = Math.floor((diff%60000)/1000);
-        document.getElementById('countdown').innerText = `ستفتح بعد: ${hours}س ${mins}د ${secs}ث`;
+        document.getElementById('countdown').innerText = `ستفتح الرسالة تلقائياً بعد: ${hours}س ${mins}د ${secs}ث`;
     }
+
     if(d && t && n) { update(); setInterval(update, 1000); }
+    else { document.getElementById('contentArea').innerHTML = "<p>الرابط غير صالح!</p>"; }
 </script>
 </body>
 </html>
