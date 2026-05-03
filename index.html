@@ -12,12 +12,10 @@
             display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; margin: 0;
         }
         
-        /* --- إضافة شاشة القفل فقط --- */
         #lockOverlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg); z-index: 10000; display: flex; align-items: center; justify-content: center;
         }
-        /* --------------------------- */
 
         .theme-romantic { --primary: #ff4bb4; background-image: radial-gradient(circle, #4b0d1d 0%, #0a0a0a 100%); }
         .theme-friend { --primary: #00d2ff; background-image: radial-gradient(circle, #0d253f 0%, #050a15 100%); }
@@ -34,14 +32,18 @@
             width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; 
             border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; box-sizing: border-box; 
         }
-        button.main-btn { 
-            background: var(--primary); color: #000; width: 100%; padding: 15px; 
+        button.main-btn, .buy-link { 
+            display: block; background: var(--primary); color: #000; width: 100%; padding: 15px; 
             border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1.1rem;
+            text-decoration: none; box-sizing: border-box; margin-top: 15px;
         }
+        .buy-link { background: #00f2ff; color: #000; border: none; }
+        .buy-link:hover { opacity: 0.8; }
+        
         .snap-btn {
             display: flex; align-items: center; justify-content: center;
             background: var(--snapchat); color: #000; text-decoration: none;
-            margin-top: 25px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 14px;
+            margin-top: 15px; padding: 10px; border-radius: 12px; font-weight: bold; font-size: 14px;
         }
         #qrcode { 
             background: white; padding: 15px; border-radius: 10px; margin-top: 20px; 
@@ -52,18 +54,23 @@
 </head>
 <body id="mainBody">
 
-    <!-- شاشة التفعيل المضافة[span_4](start_span)[span_4](end_span) -->
+    <!-- شاشة التفعيل -->
     <div id="lockOverlay">
         <div class="card">
             <h2 style="color: var(--primary);">🔒 تفعيل الوصول</h2>
             <p style="font-size: 14px;">أدخل كود التفعيل الذي حصلت عليه</p>
-            <input type="text" id="activationInput" placeholder="XX-XXXX-XXXX" style="text-align: center; letter-spacing: 1px;">
+            <input type="text" id="activationInput" placeholder="HM-XXXX-VAULT" style="text-align: center;">
             <button class="main-btn" onclick="validateKey()">تفعيل الآن</button>
             <p id="lockError" style="color: #ff4b4b; font-size: 12px; margin-top: 10px;"></p>
+            
+            <!-- زر الشراء المحدث في شاشة القفل[span_1](start_span)[span_1](end_span) -->
+            <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">
+                طلب كود جديد 🛒
+            </button>
         </div>
     </div>
 
-    <!-- الملف الرسمي كما هو[span_5](start_span)[span_5](end_span) -->
+    <!-- الواجهة الرئيسية[span_2](start_span)[span_2](end_span) -->
     <div class="card">
         <h2>تشفير الرسائل 🔒</h2>
         <p>الرصيد المتبقي: <span class="counter-box" id="counter">2</span></p>
@@ -71,7 +78,7 @@
         <div id="formArea">
             <select id="identity" onchange="changeTheme()">
                 <option value="default">-- اختر هوية الرسالة --</option>
-                <option value="romantic">الزوجة / الزوج  ❤️</option>
+                <option value="romantic">الزوجة / الزوج ❤️</option>
                 <option value="friend">صديق / صديقة ⚡</option>
                 <option value="family">الأهل 🏠</option>
                 <option value="others">أخرى (فخم) ✨</option>
@@ -88,13 +95,18 @@
 
         <div id="qrcode"></div>
 
+        <!-- زر الشراء المحدث في الواجهة الرئيسية[span_3](start_span)[span_3](end_span) -->
+        <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">
+            شراء كود تفعيل 🛒
+        </button>
+
         <a href="https://snapchat.com/t/QpzpCwr7" class="snap-btn">
             <span>👻 للدعم الفني تواصل معي</span>
         </a>
     </div>
 
 <script>
-    /* --- وظائف التفعيل المضافة[span_6](start_span)[span_6](end_span) --- */
+    /* وظائف التفعيل[span_4](start_span)[span_4](end_span) */
     const validKeys = [];
     for(let i=1001; i<=2000; i++) {
         validKeys.push("HM-" + i + "-VAULT");
@@ -104,9 +116,7 @@
         const input = document.getElementById('activationInput').value.trim().toUpperCase();
         if (validKeys.includes(input)) {
             localStorage.setItem('hamoudi_vault_unlocked', 'true');
-            document.getElementById('lockOverlay').style.transition = "0.5s";
-            document.getElementById('lockOverlay').style.opacity = "0";
-            setTimeout(() => { document.getElementById('lockOverlay').style.display = 'none'; }, 500);
+            document.getElementById('lockOverlay').style.display = 'none';
         } else {
             document.getElementById('lockError').innerText = "الكود غير صحيح!";
         }
@@ -117,9 +127,8 @@
             document.getElementById('lockOverlay').style.display = 'none';
         }
     }
-    /* ------------------------------------- */
 
-    // الملف الرسمي كما هو[span_7](start_span)[span_7](end_span)
+    /* الوظائف الأساسية للملف[span_5](start_span)[span_5](end_span) */
     let remaining = localStorage.getItem('user_credit_final') || 2;
     document.getElementById('counter').innerText = remaining;
 
