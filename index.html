@@ -9,11 +9,10 @@
         :root { --primary: #00f2ff; --bg: #0a0a0a; }
         body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; min-height: 100vh; margin: 0; }
         .card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 2px solid var(--primary); border-radius: 25px; padding: 30px; width: 100%; max-width: 400px; box-shadow: 0 0 20px var(--primary); text-align: center; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; box-sizing: border-box; font-size: 14px; }
-        button { background: var(--primary); color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: #fff; box-sizing: border-box; }
+        button { background: var(--primary); color: #000; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         #appContent { display: none; }
         .activation-box { margin-bottom: 20px; }
-        #qrcode { background: white; padding: 10px; margin-top: 20px; display: none; justify-content: center; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -23,37 +22,31 @@
         
         <div id="activationArea">
             <p style="font-size: 14px;">أدخل كود التفعيل الذي حصلت عليه من المتجر</p>
-            <input type="text" id="licenseKey" placeholder="XX-XXXX-XXXX">
+            <input type="text" id="licenseKey" placeholder="HM-XXXX-XXXX">
             <button onclick="checkLicense()">تفعيل الآن</button>
             <p id="errorMsg" style="color: #ff4b4b; font-size: 12px; margin-top: 10px;"></p>
         </div>
 
         <div id="appContent">
             <p>رصيد المحاولات المتبقي: <b id="counter">2</b></p>
-            
-            <label style="font-size: 12px; display: block; text-align: right;">اختر الثيم المناسب:</label>
-            <select id="theme">
-                <option value="romantic">زوج / زوجة ❤️</option>
-                <option value="friend">صديق / صديقة 🤝</option>
-                <option value="family">أب / أم / أخ / أخت 🏠</option>
-                <option value="others">أخرى ✨</option>
-            </select>
-
+            <select id="theme"><option value="romantic">ثيم حب ❤️</option><option value="friend">ثيم صداقة 🤝</option></select>
             <input type="text" id="senderName" placeholder="اسم المرسل">
-            <textarea id="msg" placeholder="اكتب رسالتك السرية هنا..." rows="4"></textarea>
-            
-            <label style="font-size: 12px; display: block; margin-top: 10px; text-align: right;">متى تفتح الرسالة؟</label>
+            <textarea id="msg" placeholder="اكتب رسالتك السرية هنا..."></textarea>
+            <label style="font-size: 12px; display: block; margin-top: 10px;">متى تفتح الرسالة؟</label>
             <input type="datetime-local" id="unlockTime">
-            
             <button onclick="generateVault()">إنشاء QR Code</button>
-            <div id="qrcode"></div>
+            <div id="qrcode" style="background: white; padding: 10px; margin-top: 20px; display: none; justify-content: center; border-radius: 10px;"></div>
         </div>
     </div>
 
 <script>
-    // توليد الأكواد الـ 1000 تلقائياً
+    // نظام الأكواد الـ 1000 (تم اختصار العرض هنا للسهولة ولكن الكود يعمل بالنمط)
+    // لتوليد 1000 كود في ثوانٍ، سنستخدم مصفوفة ذكية:
     const prefix = "HM-";
+    const keysCount = 1000;
     const validKeys = [];
+
+    // توليد الأكواد (هذه المعادلة تولد 1000 كود تبدأ من HM-1001 إلى HM-2000)
     for(let i=1001; i<=2000; i++) {
         validKeys.push(prefix + i + "-VAULT");
     }
@@ -74,41 +67,22 @@
         document.getElementById('titleText').innerText = "⚙️ لوحة التحكم";
     }
 
-    // التحقق من التفعيل المسبق
     if(localStorage.getItem('vault_access_granted') === 'true') showApp();
 
     function generateVault() {
-        let remaining = localStorage.getItem('user_credit');
-        if (remaining === null) remaining = 2;
+        let remaining = localStorage.getItem('user_credit') || 2;
+        if(remaining <= 0) { alert("انتهى رصيدك"); return; }
         
-        if(remaining <= 0) { 
-            alert("عذراً، انتهى رصيد المحاولات لهذا الكود."); 
-            return; 
-        }
-        
-        const sender = btoa(unescape(encodeURIComponent(document.getElementById('senderName').value)));
+        const sender = encodeURIComponent(document.getElementById('senderName').value);
         const msg = btoa(unescape(encodeURIComponent(document.getElementById('msg').value)));
-        const timeInput = document.getElementById('unlockTime').value;
-        
-        if(!timeInput) { alert("يرجى تحديد وقت فتح الرسالة"); return; }
-        
-        const time = new Date(timeInput).getTime();
+        const time = new Date(document.getElementById('unlockTime').value).getTime();
         const theme = document.getElementById('theme').value;
 
-        // رابط الموقع (تأكد من رفعه على GitHub بنفس هذا المسار)
         const finalURL = `https://secret-messages707.github.io/Vault/view.html?d=${msg}&t=${time}&n=${sender}&s=${theme}`; 
         
         const qrContainer = document.getElementById('qrcode');
-        qrContainer.innerHTML = ""; 
-        qrContainer.style.display = "flex";
-        
-        new QRCode(qrContainer, {
-            text: finalURL,
-            width: 160,
-            height: 160,
-            colorDark : "#000000",
-            colorLight : "#ffffff"
-        });
+        qrContainer.innerHTML = ""; qrContainer.style.display = "flex";
+        new QRCode(qrContainer, { text: finalURL, width: 160, height: 160 });
 
         remaining--;
         localStorage.setItem('user_credit', remaining);
