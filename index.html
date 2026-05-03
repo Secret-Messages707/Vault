@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الخزنة | Hamoudi Vault</title>
+    <title>الرسائل المشفرة | Encrypted Messages</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --primary: #00f2ff; --bg: #0a0a0a; --snapchat: #FFFC00; }
@@ -38,7 +38,6 @@
             text-decoration: none; box-sizing: border-box; margin-top: 15px;
         }
         .buy-link { background: #00f2ff; color: #000; border: none; }
-        .buy-link:hover { opacity: 0.8; }
         
         .snap-btn {
             display: flex; align-items: center; justify-content: center;
@@ -54,27 +53,19 @@
 </head>
 <body id="mainBody">
 
-    <!-- شاشة التفعيل -->
     <div id="lockOverlay">
         <div class="card">
             <h2 style="color: var(--primary);">🔒 تفعيل الوصول</h2>
-            <p style="font-size: 14px;">أدخل كود التفعيل الذي حصلت عليه</p>
-            <input type="text" id="activationInput" placeholder="روح اشتري كود ياحبيبي مافيه شي بلاش!" style="text-align: center;">
+            <input type="text" id="activationInput" placeholder="XX-XXXX-XXXX" style="text-align: center;">
             <button class="main-btn" onclick="validateKey()">تفعيل الآن</button>
-            <p id="lockError" style="color: #ff4b4b; font-size: 12px; margin-top: 10px;"></p>
-            
-            <!-- زر الشراء المحدث في شاشة القفل[span_1](start_span)[span_1](end_span) -->
-            <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">
-                طلب كود جديد 🛒
-            </button>
+            <p id="lockError" style="color: #ff4b4b; font-size: 12px;"></p>
+            <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">طلب كود جديد 🛒</button>
         </div>
     </div>
 
-    <!-- الواجهة الرئيسية[span_2](start_span)[span_2](end_span) -->
     <div class="card">
         <h2>تشفير الرسائل 🔒</h2>
         <p>الرصيد المتبقي: <span class="counter-box" id="counter">2</span></p>
-        
         <div id="formArea">
             <select id="identity" onchange="changeTheme()">
                 <option value="default">-- اختر هوية الرسالة --</option>
@@ -83,84 +74,53 @@
                 <option value="family">الأهل 🏠</option>
                 <option value="others">أخرى (فخم) ✨</option>
             </select>
-            
             <input type="text" id="senderName" placeholder="اسم المرسل">
             <textarea id="msg" rows="4" placeholder="اكتب رسالتك السرية هنا..."></textarea>
-            
             <label>وقت فتح الرسالة:</label>
             <input type="datetime-local" id="unlockTime">
-            
             <button class="main-btn" onclick="generateVault()">إنشاء الـ QR Code</button>
         </div>
-
         <div id="qrcode"></div>
-
-        <!-- زر الشراء المحدث في الواجهة الرئيسية[span_3](start_span)[span_3](end_span) -->
-        <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">
-            شراء كود تفعيل 🛒
-        </button>
-
-        <a href="https://snapchat.com/t/QpzpCwr7" class="snap-btn">
-            <span>👻 للدعم الفني تواصل معي</span>
-        </a>
+        <button class="buy-link" onclick="window.open('https://salla.sa/encrypted-messages/p/1016498357', '_blank')">شراء كود تفعيل 🛒</button>
+        <a href="https://snapchat.com/t/QpzpCwr7" class="snap-btn">👻 للدعم الفني تواصل معي</a>
     </div>
 
 <script>
-    /* وظائف التفعيل[span_4](start_span)[span_4](end_span) */
     const validKeys = [];
-    for(let i=1001; i<=2000; i++) {
-        validKeys.push("HM-" + i + "-VAULT");
-    }
+    for(let i=1001; i<=2000; i++) { validKeys.push("HM-" + i + "-VAULT"); }
 
     function validateKey() {
         const input = document.getElementById('activationInput').value.trim().toUpperCase();
-        if (validKeys.includes(input)) {
-            localStorage.setItem('hamoudi_vault_unlocked', 'true');
-            document.getElementById('lockOverlay').style.display = 'none';
-        } else {
-            document.getElementById('lockError').innerText = "الكود غير صحيح!";
-        }
+        if (validKeys.includes(input)) { document.getElementById('lockOverlay').style.display = 'none'; }
+        else { document.getElementById('lockError').innerText = "الكود غير صحيح!"; }
     }
 
-    window.onload = function() {
-        if(localStorage.getItem('hamoudi_vault_unlocked') === 'true') {
-            document.getElementById('lockOverlay').style.display = 'none';
-        }
-    }
-
-    /* الوظائف الأساسية للملف[span_5](start_span)[span_5](end_span) */
     let remaining = localStorage.getItem('user_credit_final') || 2;
     document.getElementById('counter').innerText = remaining;
 
     function changeTheme() {
         const id = document.getElementById('identity').value;
-        document.getElementById('mainBody').className = id !== 'default' ? 'theme-' + id : '';
+        document.body.className = id !== 'default' ? 'theme-' + id : '';
     }
 
     function generateVault() {
         if(parseInt(remaining) <= 0) { alert("انتهى الرصيد"); return; }
-        
-        const sender = document.getElementById('senderName').value;
         const msg = document.getElementById('msg').value;
         const time = document.getElementById('unlockTime').value;
         const id = document.getElementById('identity').value;
+        const sender = document.getElementById('senderName').value;
 
-        if(!msg || !time || id === 'default' || !sender) { 
-            alert("أكمل جميع البيانات"); return; 
-        }
+        if(!msg || !time || id === 'default' || !sender) { alert("أكمل البيانات"); return; }
 
-        const viewPageURL = "https://secret-messages707.github.io/Vault/view.html"; 
-
+        // تم تغيير الرابط هنا ليوجه لـ view.html في نفس المجلد
+        const viewPageURL = window.location.href.replace("index.html", "view.html");
         const encryptedMsg = btoa(unescape(encodeURIComponent(msg)));
         const encryptedSender = btoa(unescape(encodeURIComponent(sender)));
         const timestamp = new Date(time).getTime();
         
         const finalURL = `${viewPageURL}?d=${encryptedMsg}&t=${timestamp}&s=${id}&n=${encryptedSender}`;
-
         const qrContainer = document.getElementById('qrcode');
-        qrContainer.innerHTML = "";
-        qrContainer.style.display = "flex";
-        
+        qrContainer.innerHTML = ""; qrContainer.style.display = "flex";
         new QRCode(qrContainer, { text: finalURL, width: 200, height: 200 });
 
         remaining--;
