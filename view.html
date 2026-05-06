@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>عرض الرسالة المشفرة | Encrypted Messages</title>
-    <!-- إضافة مكتبة التشفير الأساسية لعمل الفك بشكل صحيح -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         :root { --primary: #00f2ff; --bg: #0a0a0a; }
         body { background: var(--bg); color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; }
@@ -18,9 +16,6 @@
         .sender-tag { color: var(--primary); font-weight: bold; font-size: 1.2rem; }
         .timer { font-size: 1.1rem; color: #fff; margin-top: 15px; font-weight: bold; }
         #marketingBtn { display: none; margin-top: 25px; padding: 8px 15px; background: transparent; border: 1px solid var(--primary); color: var(--primary); text-decoration: none; border-radius: 20px; font-size: 12px; }
-        /* استايل خانة الكود للحفاظ على تناسق الديزاين */
-        input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid var(--primary); background: #000; color: #fff; text-align: center; box-sizing: border-box; }
-        button { background: var(--primary); color: #000; width: 100%; padding: 12px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body id="viewBody">
@@ -35,57 +30,38 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const d = urlParams.get('d'), t = parseInt(urlParams.get('t')), s = urlParams.get('s'), n = urlParams.get('n');
-    
-    // الأكواد المسموح بها من حمودي
-    const validKeys = [];
-    for(let i=1001; i<=2000; i++) { validKeys.push("HM-" + i + "-VAULT"); }
-
     if(s && s !== 'default') { document.body.className = 'theme-' + s; }
+
+    function showMessage() {
+        try {
+            // فك تشفير المحتوى والاسم مباشرة
+            const msg = decodeURIComponent(escape(atob(d))), sender = decodeURIComponent(escape(atob(n)));
+            document.getElementById('headerTitle').innerText = "تم فتح الرسالة ✅";
+            document.getElementById('contentArea').innerHTML = `<p>مرسلة من: <span class="sender-tag">${sender}</span></p><div class="msg-box">${msg}</div>`;
+            document.getElementById('marketingBtn').style.display = 'inline-block';
+        } catch(e) { 
+            document.getElementById('contentArea').innerHTML = "<p>خطأ في فك التشفير!</p>"; 
+        }
+    }
 
     function update() {
         const diff = t - Date.now();
         if (diff <= 0) {
-            // عند انتهاء الوقت، تظهر خانة إدخال الكود
-            document.getElementById('headerTitle').innerText = "جاهز لفك التشفير 🔑";
-            document.getElementById('contentArea').innerHTML = `
-                <input type="text" id="finalActivation" placeholder="أدخل كود التفعيل">
-                <button onclick="unlockFinal()">فتح الرسالة الآن</button>
-                <p id="finalError" style="color: #ff4b4b; font-size: 12px; margin-top:10px;"></p>
-            `;
-            return;
+            showMessage();
+            return true; // لإيقاف العداد
         }
         const hours = Math.floor(diff/3600000), mins = Math.floor((diff%3600000)/60000), secs = Math.floor((diff%60000)/1000);
         document.getElementById('countdown').innerText = `ستفتح الرسالة تلقائياً بعد: ${hours}س ${mins}د ${secs}ث`;
-    }
-
-    function unlockFinal() {
-        const input = document.getElementById('finalActivation').value.trim().toUpperCase();
-        if (validKeys.includes(input)) {
-            try {
-                // فك التشفير مع دعم اللغة العربية (Base64)
-                const msg = decodeURIComponent(escape(atob(d))), sender = decodeURIComponent(escape(atob(n)));
-                document.getElementById('headerTitle').innerText = "تم فتح الرسالة ✅";
-                document.getElementById('contentArea').innerHTML = `<p>مرسلة من: <span class="sender-tag">${sender}</span></p><div class="msg-box">${msg}</div>`;
-                document.getElementById('marketingBtn').style.display = 'inline-block';
-            } catch(e) { 
-                document.getElementById('finalError').innerText = "حدث خطأ أثناء فك البيانات!"; 
-            }
-        } else {
-            document.getElementById('finalError').innerText = "كود التفعيل غير صحيح!";
-        }
+        return false;
     }
 
     if(d && t && n) { 
-        update(); 
-        const timerId = setInterval(() => {
-            const diff = t - Date.now();
-            if (diff <= 0) {
-                clearInterval(timerId);
-                update();
-            } else {
-                update();
-            }
-        }, 1000); 
+        // فحص أولي إذا كان الوقت قد انتهى بالفعل
+        if (!update()) {
+            const interval = setInterval(() => {
+                if (update()) clearInterval(interval);
+            }, 1000);
+        }
     }
     else { document.getElementById('contentArea').innerHTML = "<p>الرابط غير صالح!</p>"; }
 </script>
